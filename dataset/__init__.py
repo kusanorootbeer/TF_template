@@ -9,8 +9,8 @@ _dataset_map = {
 }
 
 
-def get_dataset(dataset_name, dataroot):
-    return _dataset_map[dataset_name](dataroot)
+def get_dataset(args):
+    return _dataset_map[args.dataset](args)
 
 
 def get_dataset_list():

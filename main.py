@@ -80,9 +80,10 @@ def main(argv=None):
 
     logger.info("create dataset")
     dataset = get_dataset(args)
-
+    import pdb;pdb.set_trace()
     logger.info("build model")
     model = build_model(args, model_args, model_class)
+
 
     logger.info("start train")
     sess = tf.Session(config=tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True)))

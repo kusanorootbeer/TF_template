@@ -12,14 +12,6 @@ import math
 
 class Dataset():
     def __init__(self, args):
-        self.dataset_name = args.dataset
-        self.dataroot = args.dataroot
         self.label = None
         self.data = None
         self.attribute = None
-
-
-
-    def load(self):
-        raise NotImplementedError
-
