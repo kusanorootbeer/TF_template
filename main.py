@@ -4,11 +4,12 @@
 import argparse
 import os
 import logging
+import git
 
 import numpy as np
 import tensorflow as tf
 
-from Dataset import Dataset
+from dataset import get_dataset_list, get_dataset
 from model import get_model_list, get_model
 
 
@@ -31,13 +32,10 @@ class FlexibleArgumentParser():
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", type=str, choices=get_model_list())
-    parser.add_argument("--data_root", type=str, help="base image dir")
-    parser.add_argument("--train_data_dir", type=str, help="generated texted images dir")
+    parser.add_argument("--dataset", type=str, choices=get_dataset_list())
     parser.add_argument("--out_dir", type=str, help="output image dir")
     parser.add_argument("--epochs", type=int)
-    parser.add_argument("--image_nest", default=1, type=int)
     parser.add_argument("--batch_size", type=int)
-    parser.add_argument("--epoch_batchs", type=int)
     return parser
 
 def get_logger(args):
@@ -68,22 +66,20 @@ def build_model(args, model_args, model_class):
 
 def main(argv=None):
     args, args_left = get_parser().parse_known_args(argv)
-    train_data_dir = args.train_data_dir
     out_dir = args.out_dir
-    if not os.path.exists(train_data_dir):
-        os.makedirs(train_data_dir)
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
     logger = get_logger(args)
     logger.info("\n" + "\n".join(["--{}={}".format(a, getattr(args, a)) for a in dir(args) if not a[0] == "_"]))
+    logger.info("git hash: "+ git.Repo(search_parent_directories=True).head.object.hexsha)
     model_class = get_model(args.model)
     model_arg_parser = argparse.ArgumentParser()
     model_class.add_argument(FlexibleArgumentParser(model_arg_parser))  # 引数の登録の重複を許す
     model_args, model_args_left = model_arg_parser.parse_known_args(argv)
 
     logger.info("create dataset")
-    dataset = Dataset(args)
+    dataset = get_dataset(args)
 
     logger.info("build model")
     model = build_model(args, model_args, model_class)

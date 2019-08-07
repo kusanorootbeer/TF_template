@@ -12,11 +12,14 @@ import math
 
 class Dataset():
     def __init__(self, args):
-        self.data_root = args.data_root
-        self.train_data_dir = args.train_data_dir
-        self.image_nest = args.image_nest
-        self.epoch_batchs = args.epoch_batchs
+        self.dataset_name = args.dataset
+        self.dataroot = args.dataroot
+        self.label = None
+        self.data = None
+        self.attribute = None
+
+
 
     def load(self):
-        pass
+        raise NotImplementedError
 

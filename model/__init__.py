@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# from .hoge import Hoge
+from .vae import VariationalAutoEncoder
 
 _model_map = {
-#    "hoge": Hoge,
+    "vae": VariationalAutoEncoder,
 }
 
 
