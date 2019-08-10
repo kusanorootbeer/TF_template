@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 import argparse
 import os
 import logging
@@ -80,7 +79,6 @@ def main(argv=None):
 
     logger.info("create dataset")
     dataset = get_dataset(args)
-    import pdb;pdb.set_trace()
     logger.info("build model")
     model = build_model(args, model_args, model_class)
 

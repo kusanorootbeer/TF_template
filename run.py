@@ -40,7 +40,7 @@ if __name__ == "__main__":
     import os
     import numpy as np
     cmd = [
-        "python3 main.py",
+        "python3.7 main.py",
     ]
     for c in lists:
         cmd.append("--{} {}".format(c ,lists[c].pop()))

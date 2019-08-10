@@ -1,0 +1,10 @@
+*.DS_Store
+*.txt
+/.*
+*.pyc
+*._*
+*.jpg
+*.ttf
+*.log
+DATA_*/
+!.gitignore
