@@ -16,7 +16,6 @@ class VariationalAutoEncoder():
         parser.add_argument("--lr", type=float)
         parser.add_argument("--out_dir", type=str)
         parser.add_argument("--batch_size", type=int)
-        parser.add_argument("--epoch_batchs", type=int)
         parser.add_argument("--epochs", type=int)
 
     def __init__(self, args):

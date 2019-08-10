@@ -12,6 +12,13 @@ import math
 
 class Dataset():
     def __init__(self, args):
-        self.label = None
-        self.data = None
-        self.attribute = None
+        self.train_label = None
+        self.train_data = None
+        self.train_attribute = None
+
+        self.test_label = None
+        self.test_data = None
+        self.test_attribute = None
+
+    def normalize(self, args):
+        raise NotImplementedError
