@@ -12,6 +12,7 @@ class VariationalAutoEncoder():
     @classmethod
     def add_argument(cls, parser):
         parser.add_argument("--input_size", type=int)
+        parser.add_argument("--input_shape", type=str)
         parser.add_argument("--units", type=str)
         parser.add_argument("--lr", type=float)
         parser.add_argument("--out_dir", type=str)
@@ -19,23 +20,23 @@ class VariationalAutoEncoder():
         parser.add_argument("--epochs", type=int)
 
     def __init__(self, args):
-        self.input_size = args.input_size
+        self.input_size = args.config["input_size"]
+        self.input_shape = args.config["input_shape"]
         self.units = eval(args.units)
         self.ls = args.lr
         self.out_dir = args.out_dir
         self.batch_size = args.batch_size
-        self.epoch_batchs = args.epoch_batchs
         self.epochs = args.epochs
 
         self.act = tf.nn.relu
-
-        self.x_base = tf.placeholder(tf.float32, [None, self.input_size])
+        import pdb;pdb.set_trace()
+        self.x = tf.placeholder(tf.float32, [None, self.input_size])
         self.is_training = tf.placeholder(tf.bool)
-        self.x_aim = tf.placeholder(tf.float32, [None, self.input_size])
+        # self.x_aim = tf.placeholder(tf.float32, [None, self.input_size])
         # self.dropout_prob = tf.nn.placeholder(tf.float32)
         # self.x_drop = tf.nn.dropout(self.x, rate=self.dropout_prob)
 
-        self._build_qz_x(self.x_base)
+        self._build_qz_x(self.x)
         self._build_px_z(self.z)
         self._build_loss()
         optimizer = tf.train.AdamOptimizer(self.lr)

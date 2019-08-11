@@ -58,7 +58,8 @@ def get_logger(args):
         logger.addHandler(filehandler)
     return logger
 
-def build_model(args, model_args, model_class):
+def build_model(args, model_args, model_class, dataset):
+    model_args.config = dataset.config
     model = model_class(model_args)
     return model
 
@@ -80,7 +81,7 @@ def main(argv=None):
     logger.info("create dataset")
     dataset = get_dataset(args)
     logger.info("build model")
-    model = build_model(args, model_args, model_class)
+    model = build_model(args, model_args, model_class, dataset)
 
 
     logger.info("start train")
