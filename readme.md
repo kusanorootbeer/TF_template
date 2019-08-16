@@ -7,7 +7,7 @@
  - [x] load dataset
     - [x] mnist
  - [ ] visualize 
-     - [ ] tenosorboard
+     - [ ] tensorboard
  - [ ] build model
     - [ ] VariationalAutoEncoder
  - [x] model training batch file
