@@ -11,3 +11,6 @@
  - [ ] build model
     - [ ] VariationalAutoEncoder
  - [x] model training batch file
+
+## for demonstration
+I will prepare VAE model for mnist dataset.
