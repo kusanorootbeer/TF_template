@@ -89,7 +89,7 @@ def main(argv=None):
     sess.run(tf.global_variables_initializer())
 
     with sess.as_default():
-        model.fit(dataset, data_group, logger, args.log)
+        model.fit(dataset, logger)
 
 
 if __name__ == "__main__":

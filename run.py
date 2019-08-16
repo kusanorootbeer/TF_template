@@ -1,6 +1,7 @@
 import argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--noloop", action="store_true", default=False)
     args = parser.parse_args()
     lists={
         "dataset":[
@@ -19,6 +20,9 @@ if __name__ == "__main__":
         ],
         "batch_size":[
             128,
+        ],
+        "lr":[
+            0.0001,
         ],
         "model":[
             # "ae",
@@ -39,14 +43,17 @@ if __name__ == "__main__":
     }
     import os
     import numpy as np
-    cmd = [
-        "python main.py",
-    ]
-    for c in lists:
-        cmd.append("--{} {}".format(c ,lists[c].pop()))
-    for c in ops:
-        if ops[c]:
-            cmd.append(("--{}".format(c)))
-    cmd=" ".join(cmd)
-    os.system(cmd)
+    while True:
+        cmd = [
+            "python main.py",
+        ]
+        for c in lists:# うまいこと重複の起きないように作りたい
+            cmd.append("--{} {}".format(c ,np.random.choice(lists[c])))
+        for c in ops:
+            if ops[c]:
+                cmd.append(("--{}".format(c)))
+        cmd=" ".join(cmd)
+        os.system(cmd)
+        if args.noloop:
+            break
 

@@ -16,6 +16,8 @@ class Mnist(Dataset):
 
         self.config["input_size"] = 28*28
         self.config["input_shape"] = (1, 28, 28)
+        self.config["train_itrs"] = self.train_data.shape[0] 
+        self.config["test_itrs"] = self.test_data.shape[0] 
 \
 
 

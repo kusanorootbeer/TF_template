@@ -18,23 +18,27 @@ class VariationalAutoEncoder():
         parser.add_argument("--out_dir", type=str)
         parser.add_argument("--batch_size", type=int)
         parser.add_argument("--epochs", type=int)
+        parser.add_argument("--net_type", type=str, choices=["MLP", "CNN", "MLP_CNN"], default="MLP")
 
     def __init__(self, args):
-        self.input_size = args.config["input_size"]
-        self.input_shape = args.config["input_shape"]
+        """ this model use config:
+        input_shape: input image data shape [channel, width, height]
+        input_size: input image data size [channel * width * height]
+        train_itrs: number of training for a epoch [number_of_train_data / batch_size]
+        """
+        for keys in args.config.keys():
+            exec("self.{} = {}".format(keys, args.config[keys]))
+
         self.units = eval(args.units)
-        self.ls = args.lr
+        self.lr = args.lr
         self.out_dir = args.out_dir
         self.batch_size = args.batch_size
         self.epochs = args.epochs
+        self.net_type = args.net_type
 
         self.act = tf.nn.relu
-        import pdb;pdb.set_trace()
         self.x = tf.placeholder(tf.float32, [None, self.input_size])
         self.is_training = tf.placeholder(tf.bool)
-        # self.x_aim = tf.placeholder(tf.float32, [None, self.input_size])
-        # self.dropout_prob = tf.nn.placeholder(tf.float32)
-        # self.x_drop = tf.nn.dropout(self.x, rate=self.dropout_prob)
 
         self._build_qz_x(self.x)
         self._build_px_z(self.z)
@@ -45,25 +49,24 @@ class VariationalAutoEncoder():
             self.train_step = optimizer.minimize(self.loss)
 
     def _train_batch(self, batch):
-        train_batch, teach_batch = batch
+        train_batch = batch
         loss, _ = tf.get_default_session().run(
             [self.loss, self.train_step],
             feed_dict={
-                self.x_base: train_batch,
+                self.x: train_batch,
                 self.is_training: True,
-                self.x_aim: teach_batch,
             })
         return loss
 
     def _evaluate(self, dataset):
         test_batch = core.common.get_test_batch(dataset)
-        loss, no_text_batch = tf.get_default_session().run(
+        loss, out_batch = tf.get_default_session().run(
             [self.loss, self.x_rec],
             feed_dict={
-                self.x_base: test_batch,
+                self.x: test_batch,
                 self.is_training: False,
             })
-        return loss, no_text_batch
+        return loss, out_batch
 
 
     def _build_qz_x(self, x):
@@ -75,8 +78,8 @@ class VariationalAutoEncoder():
             self.qz.append(hz_x)
 
         # N(mean, log_sigma_sq)
-        self.qz_mean = dense_layer(self.qz[-1], self.units[-1], use_bias=True)
-        self.qz_log_sigma_sq = dense_layer(self.qz[-1], self.units[-1], use_bias=True)
+        self.qz_mean = core.common.dense_layer(self.qz[-1], self.units[-1], use_bias=True)
+        self.qz_log_sigma_sq = core.common.dense_layer(self.qz[-1], self.units[-1], use_bias=True)
         # sample
         self.z, self.qz_eps = core.common.random_sample(
             self.qz_mean,
@@ -86,17 +89,17 @@ class VariationalAutoEncoder():
 
     def _build_px_z(self, z):
         self.px = [z]
-        for i, units in enumerate(reversed(self.units[:-1])):
-            hx_z = core.common.dense_layer(self.px)
+        for i, unit in enumerate(reversed(self.units[:-1])):
+            hx_z = core.common.dense_layer(self.px[-1], unit, use_bias=True)
             hx_z = core.common.batch_normalization(hx_z, self.is_training)
-            hx_z = self.act(hx_Z)
-            self.px.append(hx_Z)
+            hx_z = self.act(hx_z)
+            self.px.append(hx_z)
 
         # N(mean, log_sigma_sq)
-        self.px_mean = dense_layer(self.px[-1], self.input_size, use_bias=True)
-        self.px_log_sigma_sq = dense_layer(self.px[-1], self.input_size, use_bias=True)
+        self.px_mean = core.common.dense_layer(self.px[-1], self.input_size, use_bias=True)
+        self.px_log_sigma_sq = core.common.dense_layer(self.px[-1], self.input_size, use_bias=True)
         # sample
-        self.x_rec, self.px_eps = random_sample(
+        self.x_rec, self.px_eps = core.common.random_sample(
             self.px_mean,
             self.px_log_sigma_sq,
             self.is_training,
@@ -114,8 +117,8 @@ class VariationalAutoEncoder():
 
     def fit(self, dataset, logger):
         for epoch in range(1, self.epochs+1):
-            for itr in range(self.epoch_batchs):
-                batch = core.common.make_train_batch(dataset, itr, self.epoch_batchs)
+            for itr in range(self.train_itrs):
+                batch = self.make_train_batch(dataset, itr)
                 loss = self._train_batch(batch)
                 logger.info("epoch:{:5}itr:{:5}loss:{}".format(epoch, itr, loss))
             loss, out_images = self._evaluate(dataset)
@@ -125,6 +128,14 @@ class VariationalAutoEncoder():
             plt.imshow(out_image.reshape(dataset.shape))
             plt.savefig("{}/{}.png".format(self.out_dir, epoch))
             plt.close()
+
+    def make_train_batch(self, dataset, itr):
+        index = itr * self.batch_size
+        train_data_batch = dataset.train_data[index:index+self.batch_size]
+        if self.net_type == "MLP":
+            train_data_batch = train_data_batch.reshape(-1, self.input_size)
+        return train_data_batch
+
 
 
 
