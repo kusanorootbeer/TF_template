@@ -26,6 +26,7 @@ class VariationalAutoEncoder():
         input_size: input image data size [channel * width * height]
         train_itrs: number of training for a epoch [number_of_train_data / batch_size]
         """
+
         for keys in args.config.keys():
             exec("self.{} = {}".format(keys, args.config[keys]))
 
@@ -59,7 +60,7 @@ class VariationalAutoEncoder():
         return loss
 
     def _evaluate(self, dataset):
-        test_batch = core.common.get_test_batch(dataset)
+        test_batch = self._make_test_batch(dataset)
         loss, out_batch = tf.get_default_session().run(
             [self.loss, self.x_rec],
             feed_dict={
@@ -115,26 +116,67 @@ class VariationalAutoEncoder():
 
         self.loss = self.loss_z + self.loss_x
 
-    def fit(self, dataset, logger):
+    def fit(self, dataset, logger, log_file_name):
         for epoch in range(1, self.epochs+1):
             for itr in range(self.train_itrs):
-                batch = self.make_train_batch(dataset, itr)
+                # import pdb;pdb.set_trace()
+                batch = self._make_train_batch(dataset, itr)
                 loss = self._train_batch(batch)
-                logger.info("epoch:{:5}itr:{:5}loss:{}".format(epoch, itr, loss))
+                # print("epoch:{:5}  itr:{:5}loss:{}".format(epoch, itr, loss))
+                logger.info("epoch:{:5}  itr:{:5}loss:{}".format(epoch, itr, loss))
             loss, out_images = self._evaluate(dataset)
             logger.info("epoch:{:5}loss:{}")
-            out_image = out_images[0]
-            plt.figure(figsize=(40, 40))
-            plt.imshow(out_image.reshape(dataset.shape))
-            plt.savefig("{}/{}.png".format(self.out_dir, epoch))
-            plt.close()
+            # out_image = out_images[0]
+            # plt.figure(figsize=(40, 40))
+            # plt.imshow(out_image.reshape(dataset.shape))
+            # plt.savefig("{}/{}.png".format(self.out_dir, epoch))
+            # plt.close()
 
-    def make_train_batch(self, dataset, itr):
+    def _make_train_batch(self, dataset, itr):
         index = itr * self.batch_size
-        train_data_batch = dataset.train_data[index:index+self.batch_size]
+        if itr+1 == self.train_itrs:
+            rest_indices = dataset.train_data.shape[0] % self.batch_size
+            train_data_batch = dataset.train_data[index:index+rest_indices]
+        else:
+            train_data_batch = dataset.train_data[index:index+self.batch_size]
+
         if self.net_type == "MLP":
             train_data_batch = train_data_batch.reshape(-1, self.input_size)
         return train_data_batch
+
+    def _make_test_batch(self, dataset):
+        # np.random_choixceとか使ってバッチ吸う文ぐらい持ってきてテストにしようかしら
+        # test_data_batch = dataset.test_data
+        test_data_batch = dataset.test_data[0:self.batch_size]
+        if self.net_type == "MLP":
+            test_data_batch = test_data_batch.reshape(-1, self.input_size)
+        return test_data_batch
+        # raise NotImplementedError
+
+    def assess(self, dataset, logger, log_file_name):
+        loss_list = []
+        x_mean_list = []
+        x_log_sigma_sq_list = []
+
+        for data_index in range(dataset.test_data.shape[0]):
+            loss, out_x_mean, out_x_log_sigma_sq = tf.get_default_session().run(
+            [self.loss, self.px_mean, self.px_log_sigma_sq],
+            feed_dict={
+                self.x: dataset.test_data[data_index],
+                self.is_training: False,
+            })
+            loss_list.append(loss)
+            x_mean_list.append(out_x_mean)
+            x_log_sigma_sq_list.append(out_x_log_sigma_sq)
+        losses = np.array(loss_list)
+        x_means = np.array(x_mean_list)
+        x_log_sigma_sqs = np.array(x_log_sigma_sq_list)
+        save_path = log_file_name.split(".")[0]
+        np.save(save_path + "_loss.npy", losses)
+        np.save(save_path + "_mean.npy", x_means)
+        np.save(save_path + "_log_sigma_sq.npy", x_log_sigma_sqs)
+
+
 
 
 

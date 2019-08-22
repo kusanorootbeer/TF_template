@@ -11,7 +11,7 @@ if __name__ == "__main__":
             "test_out",
         ],
         "units":[
-            "200,100,20"
+            "100,50,5"
         ],
         "epochs":[
             # 10,
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     import numpy as np
     while True:
         cmd = [
-            "python main.py",
+            "python -m pdb -c continue main.py",
         ]
         for c in lists:# うまいこと重複の起きないように作りたい
             cmd.append("--{} {}".format(c ,np.random.choice(lists[c])))

@@ -51,12 +51,13 @@ def get_logger(args):
         level=logging.INFO,
     )
     logger = logging.getLogger(__name__)
+    logger.level = logging.INFO
     if log_file_name:
         filehandler = logging.FileHandler(log_file_name, mode="w")
         filehandler.setLevel(logging.INFO)
         filehandler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"))
         logger.addHandler(filehandler)
-    return logger
+    return logger, log_file_name
 
 def build_model(args, model_args, model_class, dataset):
     model_args.config = dataset.config
@@ -70,9 +71,9 @@ def main(argv=None):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
-    logger = get_logger(args)
+    logger, log_file_name = get_logger(args)
     logger.info("\n" + "\n".join(["--{}={}".format(a, getattr(args, a)) for a in dir(args) if not a[0] == "_"]))
-    logger.info("git hash: "+ git.Repo(search_parent_directories=True).head.object.hexsha)
+    logger.info("git hash: "+ git.Repo(search_parent_directories=True).head.object.hexsha + "\n")
     model_class = get_model(args.model)
     model_arg_parser = argparse.ArgumentParser()
     model_class.add_argument(FlexibleArgumentParser(model_arg_parser))  # 引数の登録の重複を許す
@@ -83,13 +84,12 @@ def main(argv=None):
     logger.info("build model")
     model = build_model(args, model_args, model_class, dataset)
 
-
     logger.info("start train")
     sess = tf.Session(config=tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True)))
     sess.run(tf.global_variables_initializer())
 
     with sess.as_default():
-        model.fit(dataset, logger)
+        model.fit(dataset, logger, log_file_name)
 
 
 if __name__ == "__main__":

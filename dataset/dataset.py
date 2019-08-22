@@ -16,7 +16,7 @@ class Dataset():
         self.test_data = None
         self.test_attribute = None
 
-        self.config = {}    # config 追加用dict
+        self.config = {}    # config追加用dict
 
     def normalize(self, args):
         raise NotImplementedError
