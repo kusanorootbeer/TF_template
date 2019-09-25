@@ -23,8 +23,8 @@ class VariationalAutoEncoder():
 
     def __init__(self, args):
         """ this model use config:
-        input_shape: input image data shape [channel, width, height]
-        input_size: input image data size [channel * width * height]
+        input_shape: input image data shape [width, height, channel]
+        input_size: input image data size [width * height * channel]
         train_itrs: number of training for a epoch [number_of_train_data / batch_size]
         """
 
@@ -130,7 +130,7 @@ class VariationalAutoEncoder():
                 # import pdb;pdb.set_trace()
                 batch = self._make_train_batch(dataset, itr)
                 loss = self._train_batch(batch)
-                # print("epoch:{:5}  itr:{:5}loss:{}".format(epoch, itr, loss))
+                # print("epoch:{:5}  itr:{:5}  loss:{}".format(epoch, itr, loss))
                 logger.info(
                     "epoch:{:5}  itr:{:5}loss:{}".format(epoch, itr, loss))
             loss, out_images = self._evaluate(dataset)
