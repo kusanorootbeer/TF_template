@@ -4,7 +4,7 @@ from .mnist import Mnist
 
 _dataset_map = {
     "mnist": Mnist,
-    #"hoge": Hoge,
+    # "hoge": Hoge,
 
 }
 

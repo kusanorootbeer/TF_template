@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from . import core
+import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
 import matplotlib as mpl
 mpl.use('Agg')
-import matplotlib.pyplot as plt
 
-from . import core
 
 class VariationalAutoEncoder():
     @classmethod
@@ -18,7 +18,8 @@ class VariationalAutoEncoder():
         parser.add_argument("--out_dir", type=str)
         parser.add_argument("--batch_size", type=int)
         parser.add_argument("--epochs", type=int)
-        parser.add_argument("--net_type", type=str, choices=["MLP", "CNN", "MLP_CNN"], default="MLP")
+        parser.add_argument("--net_type", type=str,
+                            choices=["MLP", "CNN", "MLP_CNN"], default="MLP")
 
     def __init__(self, args):
         """ this model use config:
@@ -69,7 +70,6 @@ class VariationalAutoEncoder():
             })
         return loss, out_batch
 
-
     def _build_qz_x(self, x):
         self.qz = [x]
         for i, unit in enumerate(self.units[:-1]):
@@ -79,8 +79,10 @@ class VariationalAutoEncoder():
             self.qz.append(hz_x)
 
         # N(mean, log_sigma_sq)
-        self.qz_mean = core.common.dense_layer(self.qz[-1], self.units[-1], use_bias=True)
-        self.qz_log_sigma_sq = core.common.dense_layer(self.qz[-1], self.units[-1], use_bias=True)
+        self.qz_mean = core.common.dense_layer(
+            self.qz[-1], self.units[-1], use_bias=True)
+        self.qz_log_sigma_sq = core.common.dense_layer(
+            self.qz[-1], self.units[-1], use_bias=True)
         # sample
         self.z, self.qz_eps = core.common.random_sample(
             self.qz_mean,
@@ -97,8 +99,10 @@ class VariationalAutoEncoder():
             self.px.append(hx_z)
 
         # N(mean, log_sigma_sq)
-        self.px_mean = core.common.dense_layer(self.px[-1], self.input_size, use_bias=True)
-        self.px_log_sigma_sq = core.common.dense_layer(self.px[-1], self.input_size, use_bias=True)
+        self.px_mean = core.common.dense_layer(
+            self.px[-1], self.input_size, use_bias=True)
+        self.px_log_sigma_sq = core.common.dense_layer(
+            self.px[-1], self.input_size, use_bias=True)
         # sample
         self.x_rec, self.px_eps = core.common.random_sample(
             self.px_mean,
@@ -107,11 +111,15 @@ class VariationalAutoEncoder():
         )
 
     def _build_loss(self):
-        self.nll_qz = core.common.gaussian_nll(self.z, self.qz_mean, self.qz_log_sigma_sq)
-        self.nll_pz = core.common.gaussian_nll(self.z, tf.zeros_like(self.z), tf.zeros_like(self.z))
-        self.nll_px = core.common.gaussian_nll(self.x_rec, self.px_mean, self.px_log_sigma_sq)
+        self.nll_qz = core.common.gaussian_nll(
+            self.z, self.qz_mean, self.qz_log_sigma_sq)
+        self.nll_pz = core.common.gaussian_nll(
+            self.z, tf.zeros_like(self.z), tf.zeros_like(self.z))
+        self.nll_px = core.common.gaussian_nll(
+            self.x_rec, self.px_mean, self.px_log_sigma_sq)
 
-        self.loss_z = -tf.reduce_mean(self.nll_qz) + tf.reduce_mean(self.nll_pz)
+        self.loss_z = -tf.reduce_mean(self.nll_qz) + \
+            tf.reduce_mean(self.nll_pz)
         self.loss_x = tf.reduce_mean(self.nll_px)
 
         self.loss = self.loss_z + self.loss_x
@@ -123,7 +131,8 @@ class VariationalAutoEncoder():
                 batch = self._make_train_batch(dataset, itr)
                 loss = self._train_batch(batch)
                 # print("epoch:{:5}  itr:{:5}loss:{}".format(epoch, itr, loss))
-                logger.info("epoch:{:5}  itr:{:5}loss:{}".format(epoch, itr, loss))
+                logger.info(
+                    "epoch:{:5}  itr:{:5}loss:{}".format(epoch, itr, loss))
             loss, out_images = self._evaluate(dataset)
             logger.info("epoch:{:5}loss:{}")
             # out_image = out_images[0]
@@ -160,11 +169,11 @@ class VariationalAutoEncoder():
 
         for data_index in range(dataset.test_data.shape[0]):
             loss, out_x_mean, out_x_log_sigma_sq = tf.get_default_session().run(
-            [self.loss, self.px_mean, self.px_log_sigma_sq],
-            feed_dict={
-                self.x: dataset.test_data[data_index],
-                self.is_training: False,
-            })
+                [self.loss, self.px_mean, self.px_log_sigma_sq],
+                feed_dict={
+                    self.x: dataset.test_data[data_index],
+                    self.is_training: False,
+                })
             loss_list.append(loss)
             x_mean_list.append(out_x_mean)
             x_log_sigma_sq_list.append(out_x_log_sigma_sq)
@@ -175,12 +184,3 @@ class VariationalAutoEncoder():
         np.save(save_path + "_loss.npy", losses)
         np.save(save_path + "_mean.npy", x_means)
         np.save(save_path + "_log_sigma_sq.npy", x_log_sigma_sqs)
-
-
-
-
-
-
-
-
-

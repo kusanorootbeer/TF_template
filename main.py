@@ -28,6 +28,7 @@ class FlexibleArgumentParser():
         self.parser.add_argument(*kargs, **kwards)
         return True
 
+
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", type=str, choices=get_model_list())
@@ -37,6 +38,7 @@ def get_parser():
     parser.add_argument("--batch_size", type=int)
     return parser
 
+
 def get_logger(args):
     log_file_name = args.out_dir + "/" + args.model
     ind = 0
@@ -45,7 +47,7 @@ def get_logger(args):
         if not os.path.exists(log_file_name + str(ind) + ".log"):
             break
     log_file_name = log_file_name + str(ind) + ".log"
-    
+
     logging.basicConfig(
         format="%(asctime)s [%(levelname)s] %(message)s",
         level=logging.INFO,
@@ -55,9 +57,11 @@ def get_logger(args):
     if log_file_name:
         filehandler = logging.FileHandler(log_file_name, mode="w")
         filehandler.setLevel(logging.INFO)
-        filehandler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"))
+        filehandler.setFormatter(logging.Formatter(
+            "%(asctime)s [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"))
         logger.addHandler(filehandler)
     return logger, log_file_name
+
 
 def build_model(args, model_args, model_class, dataset):
     model_args.config = dataset.config
@@ -72,11 +76,14 @@ def main(argv=None):
         os.makedirs(out_dir)
 
     logger, log_file_name = get_logger(args)
-    logger.info("\n" + "\n".join(["--{}={}".format(a, getattr(args, a)) for a in dir(args) if not a[0] == "_"]))
-    logger.info("git hash: "+ git.Repo(search_parent_directories=True).head.object.hexsha + "\n")
+    logger.info("\n" + "\n".join(["--{}={}".format(a, getattr(args, a))
+                                  for a in dir(args) if not a[0] == "_"]))
+    logger.info(
+        "git hash: " + git.Repo(search_parent_directories=True).head.object.hexsha + "\n")
     model_class = get_model(args.model)
     model_arg_parser = argparse.ArgumentParser()
-    model_class.add_argument(FlexibleArgumentParser(model_arg_parser))  # 引数の登録の重複を許す
+    model_class.add_argument(FlexibleArgumentParser(
+        model_arg_parser))  # 引数の登録の重複を許す
     model_args, model_args_left = model_arg_parser.parse_known_args(argv)
 
     logger.info("create dataset")
@@ -85,7 +92,8 @@ def main(argv=None):
     model = build_model(args, model_args, model_class, dataset)
 
     logger.info("start train")
-    sess = tf.Session(config=tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True)))
+    sess = tf.Session(config=tf.ConfigProto(
+        gpu_options=tf.GPUOptions(allow_growth=True)))
     sess.run(tf.global_variables_initializer())
 
     with sess.as_default():
@@ -94,4 +102,3 @@ def main(argv=None):
 
 if __name__ == "__main__":
     main()
-
