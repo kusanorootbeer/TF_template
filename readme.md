@@ -16,3 +16,7 @@
 ## for demonstration
 
 I will prepare VAE model for mnist dataset.
+
+## my task
+
+input data shape [h,w,c]で固定

@@ -72,11 +72,13 @@ class VariationalAutoEncoder():
 
     def _build_qz_x(self, x):
         self.qz = [x]
-        for i, unit in enumerate(self.units[:-1]):
-            hz_x = core.common.dense_layer(self.qz[-1], unit, use_bias=True)
-            hz_x = core.common.batch_normalization(hz_x, self.is_training)
-            hz_x = self.act(hz_x)
-            self.qz.append(hz_x)
+        if self.net_type == "MLP":
+            for i, unit in enumerate(self.units[:-1]):
+                hz_x = core.common.dense_layer(
+                    self.qz[-1], unit, use_bias=True)
+                hz_x = core.common.batch_normalization(hz_x, self.is_training)
+                hz_x = self.act(hz_x)
+                self.qz.append(hz_x)
 
         # N(mean, log_sigma_sq)
         self.qz_mean = core.common.dense_layer(
@@ -127,19 +129,16 @@ class VariationalAutoEncoder():
     def fit(self, dataset, logger, log_file_name):
         for epoch in range(1, self.epochs+1):
             for itr in range(self.train_itrs):
-                # import pdb;pdb.set_trace()
                 batch = self._make_train_batch(dataset, itr)
                 loss = self._train_batch(batch)
-                # print("epoch:{:5}  itr:{:5}  loss:{}".format(epoch, itr, loss))
                 logger.info(
-                    "epoch:{:5}  itr:{:5}loss:{}".format(epoch, itr, loss))
+                    "epoch:{:5}  itr:{:5}  loss:{}".format(epoch, itr, loss))
             loss, out_images = self._evaluate(dataset)
-            logger.info("epoch:{:5}loss:{}")
-            # out_image = out_images[0]
-            # plt.figure(figsize=(40, 40))
-            # plt.imshow(out_image.reshape(dataset.shape))
-            # plt.savefig("{}/{}.png".format(self.out_dir, epoch))
-            # plt.close()
+            logger.info("epoch:{:5}  loss:{}".format(epoch, loss))
+        dataset.save_fig(fig_name=log_file_name+"batch", data_array=batch[0])
+        dataset.save_fig(fig_name=log_file_name+"out", data_array=)
+        import pdb
+        pdb.set_trace()
 
     def _make_train_batch(self, dataset, itr):
         index = itr * self.batch_size
