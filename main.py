@@ -47,8 +47,8 @@ def get_logger(args):
         if not os.path.exists(log_dir_name + str(ind)):
             os.makedirs(log_dir_name + str(ind))
             break
-    log_dir_name = log_dir_name + str(ind)
-    log_file_name = log_dir_name + "/log.log"
+    log_dir_name = log_dir_name + str(ind) + "/"
+    log_file_name = log_dir_name + "log.log"
 
     logging.basicConfig(
         format="%(asctime)s [%(levelname)s] %(message)s",

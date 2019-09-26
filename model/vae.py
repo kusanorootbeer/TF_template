@@ -12,7 +12,7 @@ class VariationalAutoEncoder():
     @classmethod
     def add_argument(cls, parser):
         parser.add_argument("--input_size", type=int)
-        parser.add_argument("--input_shape", type=str)
+        # parser.add_argument("--input_shape", type=str)
         parser.add_argument("--units", type=str)
         parser.add_argument("--lr", type=float)
         parser.add_argument("--out_dir", type=str)
@@ -23,9 +23,10 @@ class VariationalAutoEncoder():
 
     def __init__(self, args):
         """ this model use config:
-        input_shape: input image data shape [width, height, channel]
-        input_size: input image data size [width * height * channel]
+        # input_shape: input image data shape [-1, height, width, channel]
+        input_size: input image data size [height * width * channel]
         train_itrs: number of training for a epoch [number_of_train_data / batch_size]
+        data_shape: image data shape [height, width, channel=3] or [height, width] 
         """
 
         for keys in args.config.keys():
@@ -60,12 +61,11 @@ class VariationalAutoEncoder():
             })
         return loss
 
-    def _evaluate(self, dataset):
-        test_batch = self._make_test_batch(dataset)
+    def _evaluate(self, batch):
         loss, out_batch = tf.get_default_session().run(
             [self.loss, self.x_rec],
             feed_dict={
-                self.x: test_batch,
+                self.x: batch,
                 self.is_training: False,
             })
         return loss, out_batch
@@ -129,37 +129,19 @@ class VariationalAutoEncoder():
     def fit(self, dataset, logger, log_dir_name):
         for epoch in range(1, self.epochs+1):
             for itr in range(self.train_itrs):
-                batch = self._make_train_batch(dataset, itr)
+                batch, _, _ = dataset.get_batch(
+                    {"itr": itr, "region": "train"})
                 loss = self._train_batch(batch)
                 logger.info(
-                    "epoch:{:5}  itr:{:5}  loss:{}".format(epoch, itr, loss))
-            loss, out_images = self._evaluate(dataset)
+                    "epoch:{:5}  itr:{:5}  loss:{}".format(epoch, itr+1, loss))
+            batch, _, _ = dataset.get_batch({"region": "test"})
+            loss, out_images = self._evaluate(batch)
             logger.info("epoch:{:5}  loss:{}".format(epoch, loss))
-        # dataset.save_fig(fig_name=log_dir_name+"batch", data_array=batch[0])
-        # dataset.save_fig(fig_name=log_dir_name+"out", data_array=out_images)
-        import pdb
-        pdb.set_trace()
-
-    def _make_train_batch(self, dataset, itr):
-        index = itr * self.batch_size
-        if itr+1 == self.train_itrs:
-            rest_indices = dataset.train_data.shape[0] % self.batch_size
-            train_data_batch = dataset.train_data[index:index+rest_indices]
-        else:
-            train_data_batch = dataset.train_data[index:index+self.batch_size]
-
-        if self.net_type == "MLP":
-            train_data_batch = train_data_batch.reshape(-1, self.input_size)
-        return train_data_batch
-
-    def _make_test_batch(self, dataset):
-        # np.random_choixceとか使ってバッチ吸う文ぐらい持ってきてテストにしようかしら
-        # test_data_batch = dataset.test_data
-        test_data_batch = dataset.test_data[0:self.batch_size]
-        if self.net_type == "MLP":
-            test_data_batch = test_data_batch.reshape(-1, self.input_size)
-        return test_data_batch
-        # raise NotImplementedError
+            dataset.shuffle()
+        dataset.save_fig(fig_name=log_dir_name+"batch",
+                         data_array=batch[0].reshape(self.data_shape))
+        dataset.save_fig(fig_name=log_dir_name+"out",
+                         data_array=out_images[0].reshape(self.data_shape))
 
     def assess(self, dataset, logger, log_file_name):
         loss_list = []
