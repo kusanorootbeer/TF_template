@@ -40,13 +40,15 @@ def get_parser():
 
 
 def get_logger(args):
-    log_file_name = args.out_dir + "/" + args.model
+    log_dir_name = args.out_dir + "/" + args.dataset + "/" + args.model
     ind = 0
     while(True):
         ind += 1
-        if not os.path.exists(log_file_name + str(ind) + ".log"):
+        if not os.path.exists(log_dir_name + str(ind)):
+            os.makedirs(log_dir_name + str(ind))
             break
-    log_file_name = log_file_name + str(ind) + ".log"
+    log_dir_name = log_dir_name + str(ind)
+    log_file_name = log_dir_name + "/log.log"
 
     logging.basicConfig(
         format="%(asctime)s [%(levelname)s] %(message)s",
@@ -60,7 +62,7 @@ def get_logger(args):
         filehandler.setFormatter(logging.Formatter(
             "%(asctime)s [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"))
         logger.addHandler(filehandler)
-    return logger, log_file_name
+    return logger, log_dir_name
 
 
 def build_model(args, model_args, model_class, dataset):
@@ -75,7 +77,7 @@ def main(argv=None):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
-    logger, log_file_name = get_logger(args)
+    logger, log_dir_name = get_logger(args)
     logger.info("\n" + "\n".join(["--{}={}".format(a, getattr(args, a))
                                   for a in dir(args) if not a[0] == "_"]))
     logger.info(
@@ -97,7 +99,7 @@ def main(argv=None):
     sess.run(tf.global_variables_initializer())
 
     with sess.as_default():
-        model.fit(dataset, logger, log_file_name)
+        model.fit(dataset, logger, log_dir_name)
 
 
 if __name__ == "__main__":

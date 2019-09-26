@@ -126,7 +126,7 @@ class VariationalAutoEncoder():
 
         self.loss = self.loss_z + self.loss_x
 
-    def fit(self, dataset, logger, log_file_name):
+    def fit(self, dataset, logger, log_dir_name):
         for epoch in range(1, self.epochs+1):
             for itr in range(self.train_itrs):
                 batch = self._make_train_batch(dataset, itr)
@@ -135,8 +135,8 @@ class VariationalAutoEncoder():
                     "epoch:{:5}  itr:{:5}  loss:{}".format(epoch, itr, loss))
             loss, out_images = self._evaluate(dataset)
             logger.info("epoch:{:5}  loss:{}".format(epoch, loss))
-        dataset.save_fig(fig_name=log_file_name+"batch", data_array=batch[0])
-        dataset.save_fig(fig_name=log_file_name+"out", data_array=)
+        # dataset.save_fig(fig_name=log_dir_name+"batch", data_array=batch[0])
+        # dataset.save_fig(fig_name=log_dir_name+"out", data_array=out_images)
         import pdb
         pdb.set_trace()
 
