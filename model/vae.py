@@ -51,7 +51,7 @@ class VariationalAutoEncoder():
         with tf.control_dependencies(update_ops):
             self.train_step = optimizer.minimize(self.loss)
 
-    def _train_batch(self, batch):
+    def _train(self, batch):
         train_batch = batch
         loss, _ = tf.get_default_session().run(
             [self.loss, self.train_step],
@@ -71,54 +71,57 @@ class VariationalAutoEncoder():
         return loss, out_batch
 
     def _build_qz_x(self, x):
-        self.qz = [x]
-        if self.net_type == "MLP":
-            for i, unit in enumerate(self.units[:-1]):
-                hz_x = core.common.dense_layer(
-                    self.qz[-1], unit, use_bias=True)
-                hz_x = core.common.batch_normalization(hz_x, self.is_training)
-                hz_x = self.act(hz_x)
-                self.qz.append(hz_x)
+        # define hidden layers parameters
+        hidden_layers_num = self.units[:-1].__len__()
+        use_bias_list = [True] * hidden_layers_num
+        activation_list = [self.act] * hidden_layers_num
+        normalization_list = ["batch"] * hidden_layers_num
 
-        # N(mean, log_sigma_sq)
+        last_hidden = core.common.build_dense_layers(
+            x, self.units[:-1], use_bias_list, activation_list, normalization_list, self.is_training)
+
+        # N(mean, log_variance)
         self.qz_mean = core.common.dense_layer(
-            self.qz[-1], self.units[-1], use_bias=True)
-        self.qz_log_sigma_sq = core.common.dense_layer(
-            self.qz[-1], self.units[-1], use_bias=True)
+            last_hidden, self.units[-1], use_bias=True)
+        self.qz_log_variance = core.common.dense_layer(
+            last_hidden, self.units[-1], use_bias=True)
+
         # sample
         self.z, self.qz_eps = core.common.random_sample(
             self.qz_mean,
-            self.qz_log_sigma_sq,
+            self.qz_log_variance,
             self.is_training,
         )
 
     def _build_px_z(self, z):
-        self.px = [z]
-        for i, unit in enumerate(reversed(self.units[:-1])):
-            hx_z = core.common.dense_layer(self.px[-1], unit, use_bias=True)
-            hx_z = core.common.batch_normalization(hx_z, self.is_training)
-            hx_z = self.act(hx_z)
-            self.px.append(hx_z)
+        # define hidden layers parameters
+        hidden_layers_num = self.units[:-1].__len__()
+        use_bias_list = [True] * hidden_layers_num
+        activation_list = [self.act] * hidden_layers_num
+        normalization_list = ["batch"] * hidden_layers_num
 
-        # N(mean, log_sigma_sq)
+        last_hidden = core.common.build_dense_layers(
+            z, reversed(self.units[:-1]), use_bias_list, activation_list, normalization_list, self.is_training)
+
+        # N(mean, log_variance)
         self.px_mean = core.common.dense_layer(
-            self.px[-1], self.input_size, use_bias=True)
-        self.px_log_sigma_sq = core.common.dense_layer(
-            self.px[-1], self.input_size, use_bias=True)
+            last_hidden, self.input_size, use_bias=True)
+        self.px_log_variance = core.common.dense_layer(
+            last_hidden, self.input_size, use_bias=True)
         # sample
         self.x_rec, self.px_eps = core.common.random_sample(
             self.px_mean,
-            self.px_log_sigma_sq,
+            self.px_log_variance,
             self.is_training,
         )
 
     def _build_loss(self):
         self.nll_qz = core.common.gaussian_nll(
-            self.z, self.qz_mean, self.qz_log_sigma_sq)
+            self.z, self.qz_mean, self.qz_log_variance)
         self.nll_pz = core.common.gaussian_nll(
             self.z, tf.zeros_like(self.z), tf.zeros_like(self.z))
         self.nll_px = core.common.gaussian_nll(
-            self.x_rec, self.px_mean, self.px_log_sigma_sq)
+            self.x_rec, self.px_mean, self.px_log_variance)
 
         self.loss_z = -tf.reduce_mean(self.nll_qz) + \
             tf.reduce_mean(self.nll_pz)
@@ -131,7 +134,7 @@ class VariationalAutoEncoder():
             for itr in range(self.train_itrs):
                 batch, _, _ = dataset.get_batch(
                     {"itr": itr, "region": "train"})
-                loss = self._train_batch(batch)
+                loss = self._train(batch)
                 logger.info(
                     "epoch:{:5}  itr:{:5}  loss:{}".format(epoch, itr+1, loss))
             batch, _, _ = dataset.get_batch({"region": "test"})
@@ -146,22 +149,22 @@ class VariationalAutoEncoder():
     def assess(self, dataset, logger, log_file_name):
         loss_list = []
         x_mean_list = []
-        x_log_sigma_sq_list = []
+        x_log_variance_list = []
 
         for data_index in range(dataset.test_data.shape[0]):
-            loss, out_x_mean, out_x_log_sigma_sq = tf.get_default_session().run(
-                [self.loss, self.px_mean, self.px_log_sigma_sq],
+            loss, out_x_mean, out_x_log_variance = tf.get_default_session().run(
+                [self.loss, self.px_mean, self.px_log_variance],
                 feed_dict={
                     self.x: dataset.test_data[data_index],
                     self.is_training: False,
                 })
             loss_list.append(loss)
             x_mean_list.append(out_x_mean)
-            x_log_sigma_sq_list.append(out_x_log_sigma_sq)
+            x_log_variance_list.append(out_x_log_variance)
         losses = np.array(loss_list)
         x_means = np.array(x_mean_list)
-        x_log_sigma_sqs = np.array(x_log_sigma_sq_list)
+        x_log_variances = np.array(x_log_variance_list)
         save_path = log_file_name.split(".")[0]
         np.save(save_path + "_loss.npy", losses)
         np.save(save_path + "_mean.npy", x_means)
-        np.save(save_path + "_log_sigma_sq.npy", x_log_sigma_sqs)
+        np.save(save_path + "_log_variance.npy", x_log_variances)

@@ -96,6 +96,13 @@ def main(argv=None):
     logger.info("start train")
     sess = tf.Session(config=tf.ConfigProto(
         gpu_options=tf.GPUOptions(allow_growth=True)))
+
+    # # TensorBoardで追跡する変数を定義
+    # with tf.name_scope('summary'):
+    #     tf.summary.scalar('loss', model.loss)
+    #     merged = tf.summary.merge_all()
+    #     writer = tf.summary.FileWriter('./logs', sess.graph)
+
     sess.run(tf.global_variables_initializer())
 
     with sess.as_default():

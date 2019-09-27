@@ -9,3 +9,4 @@
 DATA_*/
 !.gitignore
 test_out
+*log*
