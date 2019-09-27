@@ -1,4 +1,4 @@
-# Tensorflow model training template
+# Tensorflow model template
 
 ## idea
 
