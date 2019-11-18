@@ -132,12 +132,13 @@ class VariationalAutoEncoder():
     def fit(self, dataset, logger, log_dir_name):
         for epoch in range(1, self.epochs+1):
             for itr in range(self.train_itrs):
-                batch, _, _ = dataset.get_batch(
-                    {"itr": itr, "region": "train"})
+                batch = dataset.get_batch(
+                    {"itr": itr, "region": "train", "batch": "data"})
                 loss = self._train(batch)
                 logger.info(
                     "epoch:{:5}  itr:{:5}  loss:{}".format(epoch, itr+1, loss))
-            batch, _, _ = dataset.get_batch({"region": "test"})
+            batch = dataset.get_batch(
+                {"region": "test", "batch": "data"})
             loss, out_images = self._evaluate(batch)
             logger.info("epoch:{:5}  loss:{}".format(epoch, loss))
             dataset.shuffle()

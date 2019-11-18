@@ -8,16 +8,8 @@ from PIL import Image
 
 
 class Dataset():
-    def __init__(self, args):
-        self.train_label = None
-        self.train_data = None
-        self.train_attribute = None
-
-        self.test_label = None
-        self.test_data = None
-        self.test_attribute = None
-
-        self.config = {}    # config追加用dict
+    def __init__(self):
+        raise NotImplementedError
 
     def normalize(self, args):
         raise NotImplementedError
@@ -41,24 +33,7 @@ class Dataset():
             return self._get_test_batch(option_dict)
 
     def _get_train_batch(self, option_dict={}):
-        itr = option_dict.get("itr")
-        index = itr * self.batch_size
-        if index + self.batch_size > self.train_data.__len__():
-            train_batch_indices = self.train_data_indices[index:-1]
-        else:
-            train_batch_indices = self.train_data_indices[index:index+self.batch_size]
-        batch_data = self.train_data[train_batch_indices]
-        batch_label = self.train_label[train_batch_indices]
-        batch_attribute = self.train_attribute[train_batch_indices]
-        return batch_data, batch_label, batch_attribute
-
-    def _get_test_batch(self, option_dict={}):
-        indices = np.random.randint(
-            low=0, high=self.test_data.__len__(), size=self.batch_size)
-        batch_data = self.test_data[indices]
-        batch_label = self.test_label[indices]
-        batch_attribute = self.test_attribute[indices]
-        return batch_data, batch_label, batch_attribute
+        raise NotImplementedError
 
     def shuffle(self):
         np.random.shuffle(self.train_data_indices)

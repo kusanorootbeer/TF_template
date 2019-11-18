@@ -2,6 +2,7 @@ import argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--loop", action="store_true", default=False)
+    parser.add_argument("--debug", action="store_true", default=False)
     args = parser.parse_args()
     lists = {
         "dataset": [
@@ -44,11 +45,12 @@ if __name__ == "__main__":
     import os
     import numpy as np
     while True:
-        cmd = [
-            # "python -m pdb -c continue main.py",
-            "python main.py"
-        ]
-        for c in lists:  # うまいこと重複の起きないように作りたい
+        if args.debug:
+            cmd = ["python -m pdb -c continue main.py"]
+        else:
+            cmd = ["python main.py"]
+
+        for c in lists:
             cmd.append("--{} {}".format(c, np.random.choice(lists[c])))
         for c in ops:
             if ops[c]:

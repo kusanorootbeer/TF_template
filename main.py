@@ -97,6 +97,8 @@ def main(argv=None):
     sess = tf.Session(config=tf.ConfigProto(
         gpu_options=tf.GPUOptions(allow_growth=True)))
 
+    # import pdb
+    # pdb.set_trace()
     # # TensorBoardで追跡する変数を定義
     # with tf.name_scope('summary'):
     #     tf.summary.scalar('loss', model.loss)
