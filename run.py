@@ -26,11 +26,12 @@ if __name__ == "__main__":
             0.0001,
         ],
         "model": [
-            # "ae",
             "vae",
-            # "dae",
-            # "dvae"
         ],
+        "dataset_limit": [
+            # None,
+            1000,
+        ]
     }
     ops = {
         # "hoge":[

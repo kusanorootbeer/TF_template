@@ -15,6 +15,7 @@ class Dataset_image_label(Dataset):
 
         self.test_image = None
         self.test_label = None
+        self.test_num = None
 
         self.batch_size = None
 

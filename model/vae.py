@@ -70,6 +70,18 @@ class VariationalAutoEncoder():
             })
         return loss, out_batch
 
+    def _full_evaluate(self, dataset):
+        loops, rest = (len(dataset.test_num)//self.batch_size,
+                       len(dataset.test_num) % self.batch_size)
+        losses = np.empty()
+        for i in range(loops+1):
+            ind = i * self.batch_size
+            batch = dataset.test_data[ind:ind+self.batch_size]
+            if i == loops:
+                batch = dataset.test_data[ind:ind+rest]
+            loss, _ = self._evaluate(batch)
+            losses = np.concatenate([losses, loss], axis=0)
+
     def _build_qz_x(self, x):
         # define hidden layers parameters
         hidden_layers_num = self.units[:-1].__len__()
@@ -121,7 +133,7 @@ class VariationalAutoEncoder():
         self.nll_pz = core.common.gaussian_nll(
             self.z, tf.zeros_like(self.z), tf.zeros_like(self.z))
         self.nll_px = core.common.gaussian_nll(
-            self.x_rec, self.px_mean, self.px_log_variance)
+            self.x, self.px_mean, self.px_log_variance)
 
         self.loss_z = -tf.reduce_mean(self.nll_qz) + \
             tf.reduce_mean(self.nll_pz)
