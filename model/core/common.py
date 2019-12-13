@@ -89,3 +89,10 @@ def gaussian_nll(x, mean, ln_var, INF=1e3, EPS=-1e3):
     x_diff = x - mean
     x_power = (x_diff * x_diff) * x_prec
     return (ln_var + math.log(2 * math.pi) + x_power) / 2
+
+
+def calc_acc(prediction, label):
+    # prediction and label are onehot vectors each other
+    prediction = np.argmax(prediction, axis=1)
+    label = np.argmax(label, axis=1)
+    return (prediction == label).mean()

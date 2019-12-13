@@ -38,8 +38,12 @@ class Dataset_image_label(Dataset):
             return batch_image
 
     def _get_test_batch(self, option_dict={}):
-        indices = np.random.randint(
-            low=0, high=self.test_image.__len__(), size=self.batch_size)
+        if type(option_dict.get("indices")) is np.ndarray:
+            indices = option_dict.get("indices")
+        else:
+            indices = np.random.randint(
+                low=0, high=self.test_num, size=self.batch_size)
+
         if "label" in option_dict.get("batch"):
             batch_image = self.test_image[indices]
             batch_label = self.test_label[indices]

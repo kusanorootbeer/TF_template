@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from .vae import VariationalAutoEncoder
+from .mlp_classifier import MLP_Classifier
 
 _model_map = {
     "vae": VariationalAutoEncoder,
+    "mlp_classifier": MLP_Classifier,
 }
 
 

@@ -35,5 +35,8 @@ class Dataset():
     def _get_train_batch(self, option_dict={}):
         raise NotImplementedError
 
+    def _get_test_batch(self, option_dict={}):
+        raise NotImplementedError
+
     def shuffle(self):
         np.random.shuffle(self.train_data_indices)

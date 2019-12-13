@@ -17,7 +17,7 @@ class Mnist(Dataset_image_label):
                     indices, args.dataset_limit, replace=False)
             active_indices = np.concatenate([active_indices, indices], axis=0)
         active_indices = np.sort(active_indices)
-        pdb.set_trace()
+        # pdb.set_trace()
         mnist = input_data.read_data_sets("DATA_mnist/", one_hot=True)
         self.train_image = mnist.train._images[active_indices]
         self.train_label = mnist.train._labels[active_indices]
@@ -25,9 +25,10 @@ class Mnist(Dataset_image_label):
         self.test_label = mnist.test._labels
         self.batch_size = args.batch_size
         self.test_num = len(self.test_label)
-        pdb.set_trace()
+        # pdb.set_trace()
 
         self.config["input_size"] = 28*28
+        self.config["label_size"] = 10
         self.config["train_itrs"] = self.train_image.shape[0] // self.batch_size
         self.config["data_shape"] = (28, 28)
         if self.train_image.shape[0] % args.batch_size != 0:

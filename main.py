@@ -37,7 +37,7 @@ def get_parser():
     parser.add_argument("--epochs", type=int)
     parser.add_argument("--batch_size", type=int)
     parser.add_argument("--dataset_limit", type=int,
-                        default=None, help="max number of data for each label")
+                        help="max number of data for each label")
     return parser
 
 

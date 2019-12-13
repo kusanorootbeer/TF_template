@@ -18,8 +18,6 @@ class VariationalAutoEncoder():
         parser.add_argument("--out_dir", type=str)
         parser.add_argument("--batch_size", type=int)
         parser.add_argument("--epochs", type=int)
-        parser.add_argument("--net_type", type=str,
-                            choices=["MLP", "CNN", "MLP_CNN"], default="MLP")
 
     def __init__(self, args):
         """ this model use config:
@@ -37,7 +35,6 @@ class VariationalAutoEncoder():
         self.out_dir = args.out_dir
         self.batch_size = args.batch_size
         self.epochs = args.epochs
-        self.net_type = args.net_type
 
         self.act = tf.nn.relu
         self.x = tf.placeholder(tf.float32, [None, self.input_size])
@@ -71,16 +68,19 @@ class VariationalAutoEncoder():
         return loss, out_batch
 
     def _full_evaluate(self, dataset):
-        loops, rest = (len(dataset.test_num)//self.batch_size,
-                       len(dataset.test_num) % self.batch_size)
-        losses = np.empty()
+        loops, rest = (dataset.test_num//self.batch_size,
+                       dataset.test_num % self.batch_size)
+        losses = np.zeros(loops+1)
         for i in range(loops+1):
             ind = i * self.batch_size
-            batch = dataset.test_data[ind:ind+self.batch_size]
+            indices = np.arange(ind, ind+self.batch_size)
             if i == loops:
-                batch = dataset.test_data[ind:ind+rest]
+                indices = np.arange(ind, ind+rest)
+            batch = dataset.get_batch(
+                {"region": "test", "batch": "data", "indices": indices})
             loss, _ = self._evaluate(batch)
-            losses = np.concatenate([losses, loss], axis=0)
+            losses[i] = loss
+        return loss
 
     def _build_qz_x(self, x):
         # define hidden layers parameters
@@ -147,13 +147,16 @@ class VariationalAutoEncoder():
                 batch = dataset.get_batch(
                     {"itr": itr, "region": "train", "batch": "data"})
                 loss = self._train(batch)
-                logger.info(
-                    "epoch:{:5}  itr:{:5}  loss:{}".format(epoch, itr+1, loss))
+                logger.info("epoch:{:5}  itr:{:5}  loss:{}"
+                            .format(epoch, itr+1, loss))
             batch = dataset.get_batch(
                 {"region": "test", "batch": "data"})
             loss, out_images = self._evaluate(batch)
             logger.info("epoch:{:5}  loss:{}".format(epoch, loss))
             dataset.shuffle()
+        loss = self._full_evaluate(dataset)
+        logger.info("\n Finally, Full test data loss: {:5}".format(loss))
+
         dataset.save_fig(fig_name=log_dir_name+"batch",
                          data_array=batch[0].reshape(self.data_shape))
         dataset.save_fig(fig_name=log_dir_name+"out",
