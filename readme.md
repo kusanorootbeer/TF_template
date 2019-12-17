@@ -25,10 +25,11 @@
 ### compare between classifier model and generative model
 
 Accuracy Table
-| _model_ | _data restriction_ <br>1000|_data restriction_ <br>None|
-| ---- | ---- |---- |
-| MLP Classifier| ||
-| CVAE | ||
+
+| _model_        | _data restriction_ <br>1000 | _data restriction_ <br>None |
+| -------------- | --------------------------- | --------------------------- |
+| MLP Classifier |                             |                             |
+| CVAE           |                             |                             |
 
 - data restriction: Number of available training data on each label
   - None: No restriction
