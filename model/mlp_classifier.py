@@ -89,7 +89,7 @@ class MLP_Classifier():
                 batch=(data_batch, label_batch), opt={"full": True})
             labels[indices] = label_batch
             predictions[indices] = prediction
-            return core.common.calc_acc(predictions, labels)
+        return core.common.calc_acc(predictions, labels)
 
     def _build_classifier(self, x):
         # define hidden layers parameters

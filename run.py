@@ -15,18 +15,20 @@ if __name__ == "__main__":
             "100,50,5"
         ],
         "epochs": [
-            10,
+            # 10,
             # 50,
-            # 100,
+            100,
         ],
         "batch_size": [
             1280,
+            # 128,
         ],
         "lr": [
             0.0001,
         ],
         "model": [
-            "vae",
+            # "vae",
+            "cvae"
         ],
         "dataset_limit": [
             # None,
