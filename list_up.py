@@ -42,10 +42,6 @@ if __name__ == "__main__":
             False,
         ],
     }
-    # if args.debug:
-    #     cmd = ["python -m pdb -c continue main.py"]
-    # else:
-    #     cmd = ["python main.py"]
 
     keys_list = []
     for key in lists.keys():
@@ -68,8 +64,7 @@ if __name__ == "__main__":
                     cmd.append("--{}".format(key))
         cmd = " ".join(cmd)
         run_list.append(cmd)
-    # pdb.set_trace()
 
-    for cmd in run_list:
-        # os.system(cmd)
-        print(cmd)
+    with open("./stack.txt", mode="w") as f:
+        for cmd in run_list:
+            f.write(cmd+"\n")

@@ -125,4 +125,5 @@ class MLP_Classifier():
                 "epoch:{:5}  loss:{:5}  acc{:5}".format(epoch, loss, acc))
             dataset.shuffle()
         acc = self._full_evaluate(dataset)
-        logger.info("\n Finally, Full test data accuracy: {:5}".format(acc))
+        print("\n")
+        logger.info(" Finally, Full test data accuracy: {:5}".format(acc))
