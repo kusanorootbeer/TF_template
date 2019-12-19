@@ -34,4 +34,4 @@ Accuracy Table
 
 - data restriction: Number of available training data on each label
   - None: No restriction
-  - Number of training data = <img src="https://latex.codecogs.com/gif.latex?n \times" /> num of labels
+  - Number of training data = <img src="https://latex.codecogs.com/gif.latex?n&space;\times" /> num of labels
