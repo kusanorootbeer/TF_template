@@ -9,15 +9,15 @@ if __name__ == "__main__":
             "mnist",
         ],
         "out_dir": [
-            "test_out",
+            "result",
         ],
         "units": [
-            "100,50,20"
+            "200,50,20"
         ],
         "epochs": [
-            10,
+            # 10,
             # 50,
-            # 100,
+            100,
         ],
         "batch_size": [
             1280,
@@ -29,8 +29,11 @@ if __name__ == "__main__":
             "mlp_classifier",
         ],
         "dataset_limit": [
-            None,
+            # None,
             # 1000,
+            # 100,
+            # 20,
+            10
         ]
     }
     ops = {

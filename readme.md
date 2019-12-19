@@ -12,6 +12,7 @@
 - [x] build model
   - [x] VariationalAutoEncoder
   - [x] ConditionalVariationalAutoEncoder
+    - [ ] Discrimination
   - [x] MLP Classifier
 - [x] model training batch file
 - [x] parameter search list up
@@ -26,10 +27,10 @@
 
 Accuracy Table
 
-| _model_        | _data restriction_ <br>1000 | _data restriction_ <br>None |
-| -------------- | --------------------------- | --------------------------- |
-| MLP Classifier |                             |                             |
-| CVAE           |                             |                             |
+| _model_        | _data restriction_ <br>None | _data restriction_ <br>1000 | _data restriction_ <br>100 | _data restriction_ <br>20 | _data restriction_ <br>10 |
+| -------------- | --------------------------- | --------------------------- | -------------------------- | ------------------------- | ------------------------- |
+| MLP Classifier | 0.9759                      | 0.9594                      | 0.8827                     | 0.7526                    | 0.6613                    |
+| CVAE           |                             |                             |                            |                           |                           |
 
 - data restriction: Number of available training data on each label
   - None: No restriction

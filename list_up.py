@@ -11,36 +11,44 @@ if __name__ == "__main__":
             "mnist",
         ],
         "out_dir": [
-            "test_out",
+            "result",
         ],
         "units": [
-            "100,50,5"
+            "200,50,20"
         ],
         "epochs": [
-            10,
-            50,
-            100,
+            # 10,
+            # 50,
+            # 100,
+            500
         ],
         "batch_size": [
             1280,
         ],
         "lr": [
             0.0001,
-            0.001,
+            # 0.001,
         ],
         "model": [
-            "vae",
+            "cvae",
         ],
+        "dataset_limit": [
+            None,
+            1000,
+            100,
+            20,
+            10
+        ]
     }
     ops = {
-        "hoge": [
-            True,
-            # False,
-        ],
-        "fuga": [
-            True,
-            False,
-        ],
+        # "hoge": [
+        #     True,
+        #     # False,
+        # ],
+        # "fuga": [
+        #     True,
+        #     False,
+        # ],
     }
 
     keys_list = []
@@ -58,6 +66,8 @@ if __name__ == "__main__":
         for i, key in enumerate(keys_list):
             key = key.split("'")[1]
             if key in lists.keys():
+                if combi[i] == None:
+                    break
                 cmd.append("--{} {}".format(key, combi[i]))
             else:
                 if combi[i]:
