@@ -7,6 +7,7 @@
   - [x] model parameter add filename and log
 - [x] load dataset
   - [x] mnist
+- [x] available dataset restriction
 - [ ] visualize
   - [ ] tensorboard
 - [x] build model
@@ -16,10 +17,13 @@
   - [x] MLP Classifier
 - [x] model training batch file
 - [x] parameter search list up
+  - [ ] automate run the list
 
 ## for demonstration
 
     python run.py
+
+    python run_mlp.py
 
 ## Result
 
